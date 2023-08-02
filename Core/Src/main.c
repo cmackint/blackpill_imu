@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 
 /* USER CODE END Includes */
 
@@ -52,7 +53,7 @@ const uint16_t LSM303A_ADDR_READ = 0x33;  // 0011 0011
 const uint16_t LSM303A_REG_CTRL_REG1_A = 0x20; // 0010 0000
 const uint16_t LSM303A_REG_OUT_X_L_A = 0x28; // 0010 1000
 const uint16_t LSM303A_MULTI_READ_OR_MASK = 0x80; // 1000 000
-const uint8_t LSM303A_NORMAL_RES_SHIFT = 0x4; // Normal mode has 12-bit resolution
+const uint8_t LSM303A_NORMAL_RES_SHIFT = 0x6; // High mode has 12-bit resolution
 const float LSM303A_MG_PER_LSB = 0.001f;
 
 const float MS2_PER_EARTH_G = 9.80665f;

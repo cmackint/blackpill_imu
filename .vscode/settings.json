@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "main.h": "c",
+        "stm32f4xx_hal.h": "c",
+        "stdint.h": "c",
+        "cam_lsm303.h": "c",
+        "stm32f4xx_hal_i2c.h": "c",
+        "stm32f4xx_hal_conf.h": "c",
+        "stm32f4xx_hal_i2s.h": "c",
+        "stm32f4xx_hal_smbus.h": "c",
+        "stm32f4xx_hal_def.h": "c",
+        "cam_uart_logger.h": "c",
+        "stm32f4xx_hal_uart.h": "c"
+    }
+}
