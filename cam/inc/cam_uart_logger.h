@@ -1,7 +1,8 @@
 
 #ifndef CAM_UART_LOGGER_H
 #define CAM_UART_LOGGER_H
-#include "stm32f4xx_hal_uart.h"
+#include "stm32f4xx_hal.h"
+
 
 typedef struct {
     UART_HandleTypeDef *uart;

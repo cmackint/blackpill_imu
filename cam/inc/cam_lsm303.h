@@ -1,6 +1,7 @@
 #ifndef CAM_LSM303_H
 #define CAM_LSM303_H
 
+#include "stm32f4xx_hal.h"
 #include "cam_uart_logger.h"
 
 typedef enum {
@@ -36,8 +37,6 @@ void cam_lsm303_init(
     CamLsm303Mode mode,
     CamLsm303Range range
 );
-
-void cam_lsm303_set_mode(CamLsm303 *dev, CamLsm303Mode mode);
 
 void cam_lsm303_get_event(CamLsm303 *dev, CamLsm303AccelData *event);
 

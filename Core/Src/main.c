@@ -18,12 +18,14 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cam_lsm303.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 /* USER CODE END Includes */
 
@@ -48,18 +50,10 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-const uint16_t LSM303A_ADDR_WRITE = 0x32; // 0011 0010
-const uint16_t LSM303A_ADDR_READ = 0x33;  // 0011 0011
-const uint16_t LSM303A_REG_CTRL_REG1_A = 0x20; // 0010 0000
-const uint16_t LSM303A_REG_OUT_X_L_A = 0x28; // 0010 1000
-const uint16_t LSM303A_MULTI_READ_OR_MASK = 0x80; // 1000 000
-const uint8_t LSM303A_NORMAL_RES_SHIFT = 0x6; // High mode has 12-bit resolution
-const float LSM303A_MG_PER_LSB = 0.001f;
-
-const float MS2_PER_EARTH_G = 9.80665f;
-
 const char *welcome_message = "hi! ʕ •ᴥ•ʔ. this is a LSM303 accelerometer test program!\r\n"; 
-char accel_message[128]; 
+CamLogger logger = {};
+CamLsm303 lsm303 = {};
+char accel_message[256];
 
 /* USER CODE END PV */
 
@@ -74,22 +68,7 @@ static void MX_I2C1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void LM303A_Init() {
-  uint8_t write_data = 0x27;
-  HAL_I2C_Mem_Write(&hi2c1, LSM303A_ADDR_WRITE, LSM303A_REG_CTRL_REG1_A, 1, &write_data, 1, 1000);
 
-  uint8_t read_data;
-  HAL_I2C_Mem_Read(&hi2c1, LSM303A_ADDR_READ, LSM303A_REG_CTRL_REG1_A, 1 , &read_data, 1, 1000);
-  if (read_data != write_data) {
-    char error_message[128]; 
-    snprintf(error_message, sizeof(error_message), "unexpected CTRL_REG1_A value. expected %04x but was %04x\r\n", write_data, read_data);
-    HAL_UART_Transmit_IT(&huart1, (uint8_t*) error_message , strlen(error_message));
-  }
-}
-
-void LM303A_Print() {
-  
-}
 /* USER CODE END 0 */
 
 /**
@@ -123,7 +102,10 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  LM303A_Init();
+
+  cam_logger_init(&logger, &huart1);
+  cam_lsm303_init(&lsm303, &hi2c1, &logger, CAM_LSM303_MODE_HIGH, CAM_LSM303_RANGE_2);
+  
 
   /* USER CODE END 2 */
 
@@ -135,19 +117,15 @@ int main(void)
   {
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
 
-    uint8_t read_data[6];
-    HAL_I2C_Mem_Read(&hi2c1, LSM303A_ADDR_WRITE,  LSM303A_REG_OUT_X_L_A | LSM303A_MULTI_READ_OR_MASK, 1, read_data, sizeof(read_data), 1000);
-    int16_t x_accel = (int16_t) ((read_data[1] << 8) | read_data[0]) >> LSM303A_NORMAL_RES_SHIFT;
-    int16_t y_accel = (int16_t) ((read_data[3] << 8) | read_data[2]) >> LSM303A_NORMAL_RES_SHIFT;
-    int16_t z_accel = (int16_t) ((read_data[5] << 8) | read_data[4]) >> LSM303A_NORMAL_RES_SHIFT;
-    float x_accel_ms2 = (float) x_accel * LSM303A_MG_PER_LSB * MS2_PER_EARTH_G;
-    float y_accel_ms2 = (float) y_accel * LSM303A_MG_PER_LSB * MS2_PER_EARTH_G;
-    float z_accel_ms2 = (float) z_accel * LSM303A_MG_PER_LSB * MS2_PER_EARTH_G;
+    CamLsm303AccelData event_data;
+    cam_lsm303_get_event(&lsm303, &event_data);
+
     snprintf(accel_message, sizeof(accel_message), "x=%d.%d, y=%d.%d, z=%d.%d\r\n", 
-      (int) x_accel_ms2, ((int) (x_accel_ms2 * 1000)) % 1000, 
-      (int) y_accel_ms2, ((int) (y_accel_ms2 * 1000)) % 1000, 
-      (int) z_accel_ms2, ((int) (z_accel_ms2 * 1000)) % 1000);
+      (int) event_data.x, abs((int) (event_data.x * 1000)) % 1000, 
+      (int) event_data.y, abs((int) (event_data.y * 1000)) % 1000, 
+      (int) event_data.z, abs((int) (event_data.z * 1000)) % 1000);
     HAL_UART_Transmit(&huart1, (uint8_t*) accel_message, strlen(accel_message), 1000);
+
 
     HAL_Delay(50);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);

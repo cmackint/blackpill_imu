@@ -1,8 +1,11 @@
 #include "cam_lsm303.h"
-#include "stm32f4xx_hal_i2c.h"
 #include <stdint.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int _get_shift(CamLsm303 *dev);
+float _get_mg_per_lsb(CamLsm303 *dev);
 
 typedef enum {
     CAM_LSM303_RES_8 = 8, // 8-bit resolution, ignore 8 LSB
@@ -48,7 +51,6 @@ void cam_lsm303_init(
     dev->range = range;
     dev->logger = logger;
 
-    uint8_t write_data = 0x27;
     uint8_t write_data = (CAM_LSM303_10_HZ << 4) 
         | ((mode == CAM_LSM303_MODE_LOW) << 3) 
         | CAM_LSM303_X_EN | CAM_LSM303_Y_EN | CAM_LSM303_Z_EN;
@@ -82,6 +84,10 @@ void cam_lsm303_get_event(CamLsm303 *dev, CamLsm303AccelData *event) {
     float x_accel_ms2 = (float) x_accel * sensitivity * MS2_PER_EARTH_G;
     float y_accel_ms2 = (float) y_accel * sensitivity * MS2_PER_EARTH_G;
     float z_accel_ms2 = (float) z_accel * sensitivity * MS2_PER_EARTH_G;
+
+    event->x = x_accel_ms2;
+    event->y = y_accel_ms2;
+    event->z = z_accel_ms2;
 }
 
 int _get_shift(CamLsm303 *dev) {
@@ -92,6 +98,8 @@ int _get_shift(CamLsm303 *dev) {
             return 16 - CAM_LSM303_RES_12;
         case CAM_LSM303_MODE_LOW:
             return 16 - CAM_LSM303_RES_8;
+        default:
+            exit(1);
     }
 }
 
@@ -105,5 +113,7 @@ float _get_mg_per_lsb(CamLsm303 *dev) {
             return 0.004;
         case CAM_LSM303_RANGE_16:
             return 0.012;
+        default: 
+            exit(1);
     }
 }
