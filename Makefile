@@ -36,9 +36,9 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
+deps/libcamstm32/src/cam_lsm303.c \
+deps/libcamstm32/src/cam_uart_logger.c \
 Core/Src/main.c \
-cam/src/cam_lsm303.c \
-cam/src/cam_uart_logger.c \
 Core/Src/stm32f4xx_it.c \
 Core/Src/stm32f4xx_hal_msp.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \
@@ -121,7 +121,7 @@ C_INCLUDES =  \
 -IDrivers/STM32F4xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
 -IDrivers/CMSIS/Include \
--Icam/inc 
+-Ideps/libcamstm32/include
 
 
 # compile gcc flags

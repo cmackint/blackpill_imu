@@ -51,8 +51,8 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 const char *welcome_message = "hi! ʕ •ᴥ•ʔ. this is a LSM303 accelerometer test program!\r\n"; 
-CamLogger logger = {};
-CamLsm303 lsm303 = {};
+cam_logger logger = {};
+cam_lsm303 lsm303 = {};
 char accel_message[256];
 
 /* USER CODE END PV */
@@ -117,7 +117,7 @@ int main(void)
   {
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
 
-    CamLsm303AccelData event_data;
+    cam_lsm303_accel_data event_data;
     cam_lsm303_get_event(&lsm303, &event_data);
 
     snprintf(accel_message, sizeof(accel_message), "x=%d.%d, y=%d.%d, z=%d.%d\r\n", 
